@@ -1,13 +1,15 @@
-from .entities import DirectionType, Waypoint, WaypointType
-from .map import grid, GRIDNR, GRIDSIZE
-from typing import Tuple, List
 import random
+from typing import List, Tuple
+
+from .entities import DirectionType, Waypoint, WaypointType
+from .map import GRIDNR, GRIDSIZE, grid
 
 
 class Vehicle:
     RADIUS = 8
-    WAYPOINT_DISTANCE = 18
-    DIRECTION_DISTANCE = 5
+    WAYPOINT_DISTANCE = 17
+    DIRECTION_DISTANCE = 3
+    MAX_TURNS = 2
 
     def __init__(self, x: int, y: int, direction: DirectionType) -> None:
         self.x: int = x
@@ -15,9 +17,10 @@ class Vehicle:
         self.vx: int = 0
         self.vy: int = 0
         self.max_vel: int = 1
+        self.turns: int = 0
         self.current_waypoint: Waypoint
-        self.direction: DirectionType | None
         self.direction_changed: bool = False
+        self.direction: DirectionType | None = None
         self.color: Tuple[int, int, int] = (
             random.randint(50, 200),
             random.randint(50, 200),
@@ -27,8 +30,11 @@ class Vehicle:
         self.update_current_waypoint()
         self.set_direction(direction)
 
-    # TODO update only if vehicle is near to waypoint's center
-    def set_direction(self, direction: DirectionType | None):
+    def set_direction(self, direction: DirectionType):
+        if self.turns > self.MAX_TURNS:
+            return
+        if self.direction != direction:
+            self.turns += 1
         self.direction = direction
         match self.direction:
             case DirectionType.UP:
@@ -50,8 +56,8 @@ class Vehicle:
 
     def update_current_waypoint(self):
         self.nearby_waypoits.clear()
-        x_cell = self.x // GRIDSIZE
-        y_cell = self.y // GRIDSIZE
+        x_cell = int(self.x // GRIDSIZE)
+        y_cell = int(self.y // GRIDSIZE)
         min_dist = 1000**2
         min_wp = None
         for dy in [-1, 0, 1]:
@@ -86,6 +92,7 @@ class Vehicle:
                 self.stop()
             case WaypointType.ROAD:
                 self.direction_changed = False
+                self.turns = 0
 
     def move(self):
         self.x += self.vx

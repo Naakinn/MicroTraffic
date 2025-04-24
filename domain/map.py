@@ -1,7 +1,9 @@
-from .factories import waypoint_factory
-from .entities import WaypointType, Intersection, DirectionType
-import pygame as pg
 from os import path
+
+import pygame as pg
+
+from .entities import DirectionType, Intersection, WaypointType
+from .factories import waypoint_factory
 
 
 class ImageLoader:
@@ -45,7 +47,10 @@ W = waypoint_factory(WaypointType.WALL)
 road_map = [
     [W, R, R, W, W, W, W, W, W, W, W, R, R, W, W, R, R, W, W, W],
     [R, DL, UL, R, R, R, R, R, R, R, R, DL, UL, W, W, R, R, W, W, W],
-    [R, DR, UR, R, R, R, R, R, R, R, R, R, UI, W, W, R, R, W, W, W],
+    [R, DR, UR, R, R, R, R, R, R, R, R, DR, UI, W, W, R, R, W, W, W],
+    [W, R, R, W, W, W, W, W, W, W, W, R, R, W, W, DI, UL, R, R, R],
+    [W, DI, UL, R, R, R, R, R, LI, W, W, R, R, W, W, DR, UR, R, R, R],
+    [W, DR, UR, R, R, R, R, R, UI, W, W, R, R, W, W, R, R, W, W, W],
 ]
 axes = [
     9,
