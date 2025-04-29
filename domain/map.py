@@ -51,6 +51,10 @@ road_map = [
     [W, R, R, W, W, W, W, W, W, W, W, R, R, W, W, DI, UL, R, R, R],
     [W, DI, UL, R, R, R, R, R, LI, W, W, R, R, W, W, DR, UR, R, R, R],
     [W, DR, UR, R, R, R, R, R, UI, W, W, R, R, W, W, R, R, W, W, W],
+    [W, R, R, W, W, W, W, W, W, W, W, R, R, W, W, R, R, W, W, W],
+    [W, R, R, W, W, W, W, W, W, W, W, R, R, W, W, R, R, W, W, W],
+    [R, DL, UL, R, DL, LI, R, R, R, R, R, DL, UL, R, R, DL, UL, R, R, R],
+    [R, RI, UR, R, DR, UR, R, R, R, R, R, RI, UR, R, R, DR, UR, R, R, R],
 ]
 axes = [
     9,

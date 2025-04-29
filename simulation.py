@@ -47,7 +47,7 @@ class SimulationEngine:
                                 pause = not pause
                                 print(f"Pause = {pause}")
                             case pg.K_r:
-                                print("Restarting")
+                                print("Restarted")
                                 return 1
                             case pg.K_n:
                                 self.add_vehicle()
@@ -67,10 +67,10 @@ class SimulationEngine:
                     Vehicle.RADIUS,
                 )
             pg.display.flip()
-        
+
     def run(self):
         self.usage()
-        while self.mainloop(): 
+        while self.mainloop():
             self.vehicles.clear()
         pg.quit()
 
