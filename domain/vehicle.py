@@ -1,5 +1,5 @@
 import random
-from typing import List, Tuple
+from typing import Tuple
 
 from .entities import DirectionType, Waypoint, WaypointType
 from .map import GRIDNR, GRIDSIZE, grid
@@ -7,8 +7,8 @@ from .map import GRIDNR, GRIDSIZE, grid
 
 class Vehicle:
     RADIUS = 8
-    WAYPOINT_DISTANCE = 17
-    DIRECTION_DISTANCE = 3
+    WAYPOINT_DISTANCE = 10
+    DETECTION_DISTANCE = 2
     MAX_TURNS = 2
 
     def __init__(self, x: int, y: int, direction: DirectionType) -> None:
@@ -18,23 +18,23 @@ class Vehicle:
         self.vy: int = 0
         self.max_vel: int = 1
         self.turns: int = 0
-        self.current_waypoint: Waypoint
-        self.direction_changed: bool = False
+        self.current_waypoint: Waypoint | None = None
+        self.waypoint_detected: bool = False
         self.direction: DirectionType | None = None
         self.color: Tuple[int, int, int] = (
             random.randint(50, 200),
             random.randint(50, 200),
             random.randint(50, 200),
         )
-        self.nearby_waypoits: List[Waypoint] = []
         self.update_current_waypoint()
         self.set_direction(direction)
 
     def set_direction(self, direction: DirectionType):
-        if self.turns > self.MAX_TURNS:
+        if self.turns >= self.MAX_TURNS:
             return
         if self.direction != direction:
             self.turns += 1
+        self.waypoint_detected = True
         self.direction = direction
         match self.direction:
             case DirectionType.UP:
@@ -55,7 +55,6 @@ class Vehicle:
         self.vx = self.vy = 0
 
     def update_current_waypoint(self):
-        self.nearby_waypoits.clear()
         x_cell = int(self.x // GRIDSIZE)
         y_cell = int(self.y // GRIDSIZE)
         min_dist = 1000**2
@@ -71,7 +70,9 @@ class Vehicle:
                             min_dist = dist
                             min_wp = wp
 
-        self.current_waypoint = min_wp  # type: ignore
+        if self.current_waypoint != min_wp:
+            self.waypoint_detected = False
+        self.current_waypoint = min_wp
 
     def update_direction(self):
         if self.current_waypoint is None:
@@ -80,10 +81,10 @@ class Vehicle:
         match self.current_waypoint.type:
             case WaypointType.INTERSECTION:
                 if (
-                    not self.direction_changed
+                    not self.waypoint_detected
                     and (self.current_waypoint.x - self.x) ** 2
                     + (self.current_waypoint.y - self.y) ** 2
-                    <= self.DIRECTION_DISTANCE**2
+                    <= self.DETECTION_DISTANCE**2
                 ):
                     self.set_direction(
                         random.choice(self.current_waypoint.holder.directions)
@@ -91,7 +92,6 @@ class Vehicle:
             case WaypointType.WALL:
                 self.stop()
             case WaypointType.ROAD:
-                self.direction_changed = False
                 self.turns = 0
 
     def move(self):

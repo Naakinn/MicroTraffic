@@ -29,7 +29,7 @@ class SimulationEngine:
         # TODO change spawn points
         x, y = 9, 45
         self.vehicles.append(Vehicle(x, y, DirectionType.RIGHT))
-        
+
     def mainloop(self):
         pause = False
         while True:
