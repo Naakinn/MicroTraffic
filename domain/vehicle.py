@@ -1,7 +1,8 @@
 import random
 from typing import Tuple
 
-from .entities import DirectionType, Waypoint, WaypointType
+from .entities import DirectionType
+from .waypoint import Waypoint, WaypointType
 from .map import GRIDNR, GRIDSIZE, grid
 
 

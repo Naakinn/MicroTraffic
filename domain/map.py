@@ -2,8 +2,7 @@ from os import path
 
 import pygame as pg
 
-from .entities import DirectionType, Intersection, WaypointType
-from .factories import waypoint_factory
+from .waypoint import *
 
 
 class ImageLoader:
@@ -13,36 +12,6 @@ class ImageLoader:
 
 load_image = ImageLoader()
 
-DL = waypoint_factory(
-    WaypointType.INTERSECTION,
-    holder=Intersection([DirectionType.DOWN, DirectionType.LEFT]),
-)
-UL = waypoint_factory(
-    WaypointType.INTERSECTION,
-    holder=Intersection([DirectionType.UP, DirectionType.LEFT]),
-)
-DR = waypoint_factory(
-    WaypointType.INTERSECTION,
-    holder=Intersection([DirectionType.DOWN, DirectionType.RIGHT]),
-)
-UR = waypoint_factory(
-    WaypointType.INTERSECTION,
-    holder=Intersection([DirectionType.UP, DirectionType.RIGHT]),
-)
-UI = waypoint_factory(
-    WaypointType.INTERSECTION, holder=Intersection([DirectionType.UP])
-)
-DI = waypoint_factory(
-    WaypointType.INTERSECTION, holder=Intersection([DirectionType.DOWN])
-)
-RI = waypoint_factory(
-    WaypointType.INTERSECTION, holder=Intersection([DirectionType.RIGHT])
-)
-LI = waypoint_factory(
-    WaypointType.INTERSECTION, holder=Intersection([DirectionType.LEFT])
-)
-R = waypoint_factory(WaypointType.ROAD)
-W = waypoint_factory(WaypointType.WALL)
 
 road_map = [
     [W, R, R, W, W, W, W, W, W, W, W, R, R, W, W, R, R, W, W, W],

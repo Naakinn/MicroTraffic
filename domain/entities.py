@@ -1,13 +1,8 @@
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Any, List
+from typing import List
 
-
-class WaypointType(Enum):
-    ROAD = "ROAD"
-    WALL = "WALL"
-    INTERSECTION = "INTERSECTION"
-    TRAFFIC_LIGHT = "TRAFFIC_LIGHT"
+import pygame as pg
 
 
 class DirectionType(Enum):
@@ -22,10 +17,10 @@ class Intersection:
     directions: List[DirectionType]
 
 
-@dataclass
-class Waypoint:
-    x: int
-    y: int
-    type: WaypointType
-    RADIUS = 10
-    holder: Any = None
+class Cell(pg.surface.Surface):
+    def __init__(self, *args, **kwargs) -> None:
+        self.enabled: bool = False
+        super().__init__(*args, **kwargs)
+
+    def set_enabled(self, val: bool):
+        self.enabled = val
