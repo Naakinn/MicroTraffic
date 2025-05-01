@@ -12,6 +12,18 @@ class DirectionType(Enum):
     RIGHT = auto()
 
 
+class CellType(Enum):
+    R = auto()
+    W = auto()
+    UI = auto()
+    RI = auto()
+    DI = auto()
+    LI = auto()
+    UL = auto()
+    UR = auto()
+    DR = auto()
+    DL = auto()
+
 @dataclass
 class Intersection:
     directions: List[DirectionType]
@@ -19,8 +31,8 @@ class Intersection:
 
 class Cell(pg.surface.Surface):
     def __init__(self, *args, **kwargs) -> None:
-        self.enabled: bool = False
         super().__init__(*args, **kwargs)
+        self.type: CellType = CellType.W
 
-    def set_enabled(self, val: bool):
-        self.enabled = val
+    def set_type(self, type: CellType):
+        self.type = type
