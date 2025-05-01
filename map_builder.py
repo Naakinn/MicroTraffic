@@ -76,9 +76,12 @@ class MapBuilder:
                             self.export()
                     case pg.MOUSEWHEEL:
                         # Switch cell types
-                        current_surf_idx += ev.dict["y"] if ev.dict["y"] > 0 else 0
+                        current_surf_idx += ev.dict["y"]
                         if current_surf_idx >= len(self.cursor_surfaces):
                             current_surf_idx = 0
+                        elif current_surf_idx < 0:
+                            current_surf_idx = len(self.cursor_surfaces) - 1
+                            
 
             for i in range(self.grinnr):
                 for j in range(self.grinnr):
