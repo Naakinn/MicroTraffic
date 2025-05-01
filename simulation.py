@@ -76,5 +76,5 @@ class SimulationEngine:
 
 
 if __name__ == "__main__":
-    sim = SimulationEngine("city_map.png", (400, 400))
+    sim = SimulationEngine("res/city_map.png", (400, 400))
     sim.run()
