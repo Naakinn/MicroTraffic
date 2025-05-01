@@ -1,10 +1,11 @@
+import pickle
 from typing import Tuple
 
 import pygame as pg
 
 from domain.entities import Cell, CellType
-from domain.waypoint import *
 from domain.map import load_image
+from domain.waypoint import *
 
 # Colors (RGB)
 BLACK = (60, 60, 60)
@@ -17,13 +18,15 @@ class MapBuilder:
 
     def __init__(self, size: Tuple[int, int], gridnr: int):
         pg.init()
-        self.grinnr = gridnr
-        self.grid_size = size[0] // self.grinnr
+        self.gridnr = gridnr
+        self.grid_size = size[0] // self.gridnr
+        self.width = size[0]
+        self.height = size[1]
         self.screen = pg.display.set_mode(size)
         self.clock = pg.time.Clock()
         self.grid = [
-            [Cell((self.grid_size, self.grid_size)) for _ in range(0, self.grinnr)]
-            for _ in range(0, self.grinnr)
+            [Cell((self.grid_size, self.grid_size)) for _ in range(0, self.gridnr)]
+            for _ in range(0, self.gridnr)
         ]
         self.cursor_surfaces = []
         self.cursor_surf_types = []
@@ -48,10 +51,59 @@ class MapBuilder:
             CellType.UR,
             CellType.DR,
             CellType.DL,
+            CellType.S,
         ]
 
     def export(self):
-        pass
+        waypoints = []
+        x = y = 0
+        for i in range(self.gridnr):
+            x = 0
+            for j in range(self.gridnr):
+                wp: Waypoint | None = None
+                match self.grid[i][j].type:
+                    case CellType.R:
+                        wp = R(x + self.grid_size // 2, y + self.grid_size // 2)
+                    case CellType.W:
+                        wp = W(x + self.grid_size // 2, y + self.grid_size // 2)
+                    case CellType.UI:
+                        wp = UI(x + self.grid_size // 2, y + self.grid_size // 2)
+                    case CellType.RI:
+                        wp = RI(x + self.grid_size // 2, y + self.grid_size // 2)
+                    case CellType.DI:
+                        wp = DI(x + self.grid_size // 2, y + self.grid_size // 2)
+                    case CellType.LI:
+                        wp = LI(x + self.grid_size // 2, y + self.grid_size // 2)
+                    case CellType.UL:
+                        wp = UL(x + self.grid_size // 2, y + self.grid_size // 2)
+                    case CellType.UR:
+                        wp = UR(x + self.grid_size // 2, y + self.grid_size // 2)
+                    case CellType.DR:
+                        wp = DR(x + self.grid_size // 2, y + self.grid_size // 2)
+                    case CellType.DL:
+                        wp = DL(x + self.grid_size // 2, y + self.grid_size // 2)
+                assert wp != None
+                waypoints.append(wp)
+                x += self.grid_size
+            y += self.grid_size
+
+        GRIDNR = 12
+        GRIDSIZE = self.width // GRIDNR
+        grid = [[[] for _ in range(GRIDNR)] for _ in range(GRIDNR)]
+        for wp in waypoints:
+            x_cell = wp.x // GRIDSIZE  # type: ignore
+            y_cell = wp.y // GRIDSIZE  # type: ignore
+            grid[y_cell][x_cell].append(wp)
+
+        with open("grid.pickle", "wb") as file:
+            pickle.dump(grid, file)
+        print("Written grid to grid.pickle")
+
+        imgdata = pg.surfarray.array3d(self.screen)
+
+        with open("surf.pickle", "wb") as file:
+            pickle.dump(imgdata, file)
+        print("Written screen to surf.pickle")
 
     def run(self):
         self.load_cursor_surfaces()
@@ -74,6 +126,7 @@ class MapBuilder:
                         if ev.key == pg.K_x:
                             print("Exporting current map")
                             self.export()
+                            running = False
                     case pg.MOUSEWHEEL:
                         # Switch cell types
                         current_surf_idx += ev.dict["y"]
@@ -81,10 +134,9 @@ class MapBuilder:
                             current_surf_idx = 0
                         elif current_surf_idx < 0:
                             current_surf_idx = len(self.cursor_surfaces) - 1
-                            
 
-            for i in range(self.grinnr):
-                for j in range(self.grinnr):
+            for i in range(self.gridnr):
+                for j in range(self.gridnr):
                     self.grid[i][j].fill(BLACK)
 
             mouse_x, mouse_y = pg.mouse.get_pos()
@@ -103,9 +155,9 @@ class MapBuilder:
 
             # Draw grid cells
             sx = sy = 0
-            for i in range(self.grinnr):
+            for i in range(self.gridnr):
                 sx = 0
-                for j in range(self.grinnr):
+                for j in range(self.gridnr):
                     # Determine cell type
                     match self.grid[i][j].type:
                         case CellType.R:
