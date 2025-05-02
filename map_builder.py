@@ -51,7 +51,6 @@ class MapBuilder:
             CellType.UR,
             CellType.DR,
             CellType.DL,
-            CellType.S,
         ]
 
     def export(self):
