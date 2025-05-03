@@ -24,6 +24,7 @@ class CellType(Enum):
     DR = auto()
     DL = auto()
 
+
 @dataclass
 class Intersection:
     directions: List[DirectionType]
@@ -36,3 +37,8 @@ class Cell(pg.surface.Surface):
 
     def set_type(self, type: CellType):
         self.type = type
+
+@dataclass
+class Block:
+    size: int
+    type: CellType

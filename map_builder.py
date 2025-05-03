@@ -3,9 +3,8 @@ from typing import Tuple
 
 import pygame as pg
 
-from domain.entities import Cell, CellType
-from domain.map import load_image
-from domain.waypoint import *
+from domain.entities import Block, Cell, CellType
+from domain.image_loader import image_load
 
 # Colors (RGB)
 BLACK = (60, 60, 60)
@@ -38,7 +37,7 @@ class MapBuilder:
         for name in ("UI", "RI", "DI", "LI", "UL", "UR", "DR", "DL"):
             self.cursor_surfaces.append(
                 pg.transform.scale(
-                    load_image("res/" + name + ".png"), (self.grid_size, self.grid_size)
+                    image_load("res/" + name + ".png"), (self.grid_size, self.grid_size)
                 )
             )
         self.cursor_surf_types = [
@@ -54,55 +53,62 @@ class MapBuilder:
         ]
 
     def export(self):
-        waypoints = []
-        x = y = 0
+        grid = [[] for _ in range(self.gridnr)]
         for i in range(self.gridnr):
-            x = 0
             for j in range(self.gridnr):
-                wp: Waypoint | None = None
-                match self.grid[i][j].type:
-                    case CellType.R:
-                        wp = R(x + self.grid_size // 2, y + self.grid_size // 2)
-                    case CellType.W:
-                        wp = W(x + self.grid_size // 2, y + self.grid_size // 2)
-                    case CellType.UI:
-                        wp = UI(x + self.grid_size // 2, y + self.grid_size // 2)
-                    case CellType.RI:
-                        wp = RI(x + self.grid_size // 2, y + self.grid_size // 2)
-                    case CellType.DI:
-                        wp = DI(x + self.grid_size // 2, y + self.grid_size // 2)
-                    case CellType.LI:
-                        wp = LI(x + self.grid_size // 2, y + self.grid_size // 2)
-                    case CellType.UL:
-                        wp = UL(x + self.grid_size // 2, y + self.grid_size // 2)
-                    case CellType.UR:
-                        wp = UR(x + self.grid_size // 2, y + self.grid_size // 2)
-                    case CellType.DR:
-                        wp = DR(x + self.grid_size // 2, y + self.grid_size // 2)
-                    case CellType.DL:
-                        wp = DL(x + self.grid_size // 2, y + self.grid_size // 2)
-                assert wp != None
-                waypoints.append(wp)
-                x += self.grid_size
-            y += self.grid_size
-
-        GRIDNR = 12
-        GRIDSIZE = self.width // GRIDNR
-        grid = [[[] for _ in range(GRIDNR)] for _ in range(GRIDNR)]
-        for wp in waypoints:
-            x_cell = wp.x // GRIDSIZE  # type: ignore
-            y_cell = wp.y // GRIDSIZE  # type: ignore
-            grid[y_cell][x_cell].append(wp)
+                grid[i].append(Block(self.grid_size, self.grid[i][j].type))
 
         with open("grid.pickle", "wb") as file:
             pickle.dump(grid, file)
         print("Written grid to grid.pickle")
 
-        imgdata = pg.surfarray.array3d(self.screen)
+        # Prepare screen for dump
+        self.fill(BLACK)
+        self.draw()
+        with open("surfarray.pickle", "wb") as file:
+            pickle.dump(pg.surfarray.array3d(self.screen), file)
+        print("Written surface array to surfarray.pickle")
 
-        with open("surf.pickle", "wb") as file:
-            pickle.dump(imgdata, file)
-        print("Written screen to surf.pickle")
+    def fill(self, color: Tuple[int, int, int]):
+        for i in range(self.gridnr):
+            for j in range(self.gridnr):
+                self.grid[i][j].fill(color)
+
+    def draw(self):
+        sx = sy = 0
+        for i in range(self.gridnr):
+            sx = 0
+            for j in range(self.gridnr):
+                # Determine cell type
+                match self.grid[i][j].type:
+                    case CellType.R:
+                        self.grid[i][j].blit(self.cursor_surfaces[0], (0, 0))
+                    case CellType.UI:
+                        self.grid[i][j].blit(self.cursor_surfaces[1], (0, 0))
+                    case CellType.RI:
+                        self.grid[i][j].blit(self.cursor_surfaces[2], (0, 0))
+                    case CellType.DI:
+                        self.grid[i][j].blit(self.cursor_surfaces[3], (0, 0))
+                    case CellType.LI:
+                        self.grid[i][j].blit(self.cursor_surfaces[4], (0, 0))
+                    case CellType.UL:
+                        self.grid[i][j].blit(self.cursor_surfaces[5], (0, 0))
+                    case CellType.UR:
+                        self.grid[i][j].blit(self.cursor_surfaces[6], (0, 0))
+                    case CellType.DR:
+                        self.grid[i][j].blit(self.cursor_surfaces[7], (0, 0))
+                    case CellType.DL:
+                        self.grid[i][j].blit(self.cursor_surfaces[8], (0, 0))
+                # Draw cell
+                self.screen.blit(self.grid[i][j], (sx, sy))
+                sx += self.grid_size
+            sy += self.grid_size
+
+        # Draw grid borders
+        for x in range(0, WIDTH, self.grid_size):
+            pg.draw.line(self.screen, GRAY, (x, 0), (x, HEIGHT))
+        for y in range(0, HEIGHT, self.grid_size):
+            pg.draw.line(self.screen, GRAY, (0, y), (WIDTH, y))
 
     def run(self):
         self.load_cursor_surfaces()
@@ -134,9 +140,7 @@ class MapBuilder:
                         elif current_surf_idx < 0:
                             current_surf_idx = len(self.cursor_surfaces) - 1
 
-            for i in range(self.gridnr):
-                for j in range(self.gridnr):
-                    self.grid[i][j].fill(BLACK)
+            self.fill(BLACK)
 
             mouse_x, mouse_y = pg.mouse.get_pos()
             mouse_clicked = pg.mouse.get_pressed()
@@ -152,43 +156,7 @@ class MapBuilder:
                 self.grid[i][j].set_type(CellType.W)
                 self.grid[i][j].fill(BLACK)
 
-            # Draw grid cells
-            sx = sy = 0
-            for i in range(self.gridnr):
-                sx = 0
-                for j in range(self.gridnr):
-                    # Determine cell type
-                    match self.grid[i][j].type:
-                        case CellType.R:
-                            self.grid[i][j].blit(self.cursor_surfaces[0], (0, 0))
-                        case CellType.UI:
-                            self.grid[i][j].blit(self.cursor_surfaces[1], (0, 0))
-                        case CellType.RI:
-                            self.grid[i][j].blit(self.cursor_surfaces[2], (0, 0))
-                        case CellType.DI:
-                            self.grid[i][j].blit(self.cursor_surfaces[3], (0, 0))
-                        case CellType.LI:
-                            self.grid[i][j].blit(self.cursor_surfaces[4], (0, 0))
-                        case CellType.UL:
-                            self.grid[i][j].blit(self.cursor_surfaces[5], (0, 0))
-                        case CellType.UR:
-                            self.grid[i][j].blit(self.cursor_surfaces[6], (0, 0))
-                        case CellType.DR:
-                            self.grid[i][j].blit(self.cursor_surfaces[7], (0, 0))
-                        case CellType.DL:
-                            self.grid[i][j].blit(self.cursor_surfaces[8], (0, 0))
-                    # Draw cell
-                    self.screen.blit(self.grid[i][j], (sx, sy))
-                    sx += self.grid_size
-                sy += self.grid_size
-
-            # Draw grid borders
-            for x in range(0, WIDTH, self.grid_size):
-                pg.draw.line(self.screen, GRAY, (x, 0), (x, HEIGHT))
-            for y in range(0, HEIGHT, self.grid_size):
-                pg.draw.line(self.screen, GRAY, (0, y), (WIDTH, y))
-
-            # Update
+            self.draw()
             pg.display.flip()
 
     pg.quit()

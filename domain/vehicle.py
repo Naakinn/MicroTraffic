@@ -1,33 +1,42 @@
 import random
-from typing import Tuple
+from typing import Tuple, List
 
-from .entities import DirectionType
-from .waypoint import Waypoint, WaypointType
-from .map import GRIDNR, GRIDSIZE, grid
+from numpy import e
+
+from .entities import DirectionType, CellType, Block
 
 
 class Vehicle:
-    RADIUS = 8
-    WAYPOINT_DISTANCE = 10
-    DETECTION_DISTANCE = 2
+    RADIUS = 10
+    DETECTION_DISTANCE = 3
     MAX_TURNS = 2
 
-    def __init__(self, x: int, y: int, direction: DirectionType) -> None:
+    def __init__(
+        self,
+        x: int,
+        y: int,
+        block_size: int,
+        grid: List[List[Block]],
+        direction: DirectionType,
+    ) -> None:
         self.x: int = x
         self.y: int = y
         self.vx: int = 0
         self.vy: int = 0
         self.max_vel: int = 1
         self.turns: int = 0
-        self.current_waypoint: Waypoint | None = None
-        self.waypoint_detected: bool = False
+        self.block_size: int = block_size
+        self.grid: List[List[Block]] = grid
+        self.current_block: Block | None = None
+        self.block_detected: bool = False
         self.direction: DirectionType | None = None
         self.color: Tuple[int, int, int] = (
             random.randint(50, 200),
             random.randint(50, 200),
             random.randint(50, 200),
         )
-        self.update_current_waypoint()
+
+        self.update_current_block()
         self.set_direction(direction)
 
     def set_direction(self, direction: DirectionType):
@@ -35,7 +44,7 @@ class Vehicle:
             return
         if self.direction != direction:
             self.turns += 1
-        self.waypoint_detected = True
+        self.block_detected = True
         self.direction = direction
         match self.direction:
             case DirectionType.UP:
@@ -55,48 +64,68 @@ class Vehicle:
         self.direction = None
         self.vx = self.vy = 0
 
-    def update_current_waypoint(self):
-        x_cell = int(self.x // GRIDSIZE)
-        y_cell = int(self.y // GRIDSIZE)
-        min_dist = 1000**2
-        min_wp = None
-        for dy in [-1, 0, 1]:
-            for dx in [-1, 0, 1]:
-                new_x = x_cell + dx
-                new_y = y_cell + dy
-                if 0 <= new_x < GRIDNR and 0 <= new_y < GRIDNR:
-                    for wp in grid[new_y][new_x]:
-                        dist = (wp.x - self.x) ** 2 + (wp.y - self.y) ** 2
-                        if dist <= self.WAYPOINT_DISTANCE**2 and dist < min_dist:
-                            min_dist = dist
-                            min_wp = wp
+    def update_current_block(self):
+        i = self.y // self.block_size
+        j = self.x // self.block_size
+        if 0 <= i < len(self.grid) and 0 <= j < len(self.grid[0]):
+            if self.current_block != self.grid[i][j]:
+                self.block_detected = False
+            self.current_block = self.grid[i][j]
+        else:
+            self.current_block = None
 
-        if self.current_waypoint != min_wp:
-            self.waypoint_detected = False
-        self.current_waypoint = min_wp
+    def match_direction(self, type: CellType):
+        match type:
+            case CellType.UI:
+                self.set_direction(DirectionType.UP)
+            case CellType.RI:
+                self.set_direction(DirectionType.RIGHT)
+            case CellType.DI:
+                self.set_direction(DirectionType.DOWN)
+            case CellType.LI:
+                self.set_direction(DirectionType.LEFT)
+            case CellType.DL:
+                self.set_direction(
+                    random.choice((DirectionType.DOWN, DirectionType.LEFT))
+                )
+            case CellType.UL:
+                self.set_direction(
+                    random.choice((DirectionType.UP, DirectionType.LEFT))
+                )
+            case CellType.UR:
+                self.set_direction(
+                    random.choice((DirectionType.UP, DirectionType.RIGHT))
+                )
+            case CellType.DR:
+                self.set_direction(
+                    random.choice((DirectionType.DOWN, DirectionType.RIGHT))
+                )
 
     def update_direction(self):
-        if self.current_waypoint is None:
+        if self.current_block is None:
             self.stop()
             return
-        match self.current_waypoint.type:
-            case WaypointType.INTERSECTION:
+        match self.current_block.type:  # type: ignore
+            case CellType.R:
+                self.turns = 0
+            case CellType.W:
+                self.stop()
+            case _:
+                center_x = (
+                    self.x // self.block_size
+                ) * self.block_size + self.block_size // 2
+                center_y = (
+                    self.y // self.block_size
+                ) * self.block_size + self.block_size // 2
                 if (
-                    not self.waypoint_detected
-                    and (self.current_waypoint.x - self.x) ** 2
-                    + (self.current_waypoint.y - self.y) ** 2
+                    not self.block_detected
+                    and (center_x - self.x) ** 2 + (center_y - self.y) ** 2
                     <= self.DETECTION_DISTANCE**2
                 ):
-                    self.set_direction(
-                        random.choice(self.current_waypoint.holder.directions)
-                    )
-            case WaypointType.WALL:
-                self.stop()
-            case WaypointType.ROAD:
-                self.turns = 0
+                    self.match_direction(self.current_block.type)  # type: ignore
 
     def move(self):
         self.x += self.vx
         self.y += self.vy
-        self.update_current_waypoint()
+        self.update_current_block()
         self.update_direction()
