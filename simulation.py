@@ -3,6 +3,7 @@ from typing import List, Tuple
 import pygame as pg
 import os
 import pickle
+import logging
 
 from domain.entities import Block, CellType, DirectionType
 from domain.vehicle import Vehicle
@@ -25,11 +26,17 @@ class SimulationEngine:
         self.current_surf_idx: int = 0
         self.cursor_surfaces: List[pg.Surface] = []
         self.cursor_surf_types: List[CellType] = []
-
+        self.logfile = "simulation.log"
+        self.init_logging()
+        
+    def init_logging(self):
+        logging.basicConfig(filename=self.logfile, level=logging.INFO)
+        self.logger = logging.getLogger(__name__)
+        
     def usage(self):
-        print("Welcome to MicroTraffic simulation")
-        print("Press <SPACE> to pause")
-        print("Press <R> to restart")
+        self.logger.debug("Welcome to MicroTraffic Simulation")
+        self.logger.debug("Press <SPACE> to pause")
+        self.logger.debug("Press <R> to restart")
 
     def load_cursor_surfaces(self):
         for name in ("UI", "RI", "DI", "LI"):
@@ -47,16 +54,16 @@ class SimulationEngine:
 
     def import_map(self):
         if not (os.path.exists(self.gridpath) and os.path.exists(self.surfpath)):
-            print(f"'{self.gridpath}' and/or '{self.surfpath}' no such file(s)")
+            self.logger.error(f"'{self.gridpath}' and/or '{self.surfpath}' no such file(s)")
             pg.quit()
             quit(1)
         with open(self.gridpath, "rb") as file:
             self.grid = pickle.load(file)
             self.grid_size = self.grid[0][0].size
-        print(f"'{self.gridpath}' imported")
+        self.logger.info(f"'{self.gridpath}' imported")
         with open(self.surfpath, "rb") as file:
             self.map = pg.surfarray.make_surface(pickle.load(file))
-        print(f"'{self.surfpath}' imported")
+        self.logger.info(f"'{self.surfpath}' imported")
 
     def add_vehicle(self, mouse_x: int, mouse_y: int):
         x = (mouse_x // self.grid_size) * self.grid_size + self.grid_size // 2
@@ -71,7 +78,12 @@ class SimulationEngine:
             case _:
                 direction = DirectionType.LEFT
         self.vehicles.append(Vehicle(x, y, self.grid_size, self.grid, direction))
-
+        
+    def log(self):
+        open(self.logfile, 'w').close()
+        for idx, v in enumerate(self.vehicles):
+            self.logger.info(f"{idx}:{v.x}:{v.y}")
+        
     def mainloop(self):
         pause = False
         max_delay = 30
@@ -89,9 +101,12 @@ class SimulationEngine:
                         match event.key:
                             case pg.K_SPACE:
                                 pause = not pause
-                                print(f"Pause = {pause}")
+                                if pause:
+                                    self.logger.debug("Paused")
+                                else:
+                                    self.logger.debug("Resumed")
                             case pg.K_r:
-                                print("Restarted")
+                                self.logger.debug("Restarted")
                                 return 1
                     case pg.MOUSEWHEEL:
                         self.current_surf_idx += event.dict["y"]
@@ -100,6 +115,8 @@ class SimulationEngine:
                         elif self.current_surf_idx < 0:
                             self.current_surf_idx = len(self.cursor_surfaces) - 1
 
+            # Log
+            self.log()
             # Draw map
             self.screen.blit(self.map, (0, 0))
 
