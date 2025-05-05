@@ -58,14 +58,14 @@ class MapBuilder:
             for j in range(self.gridnr):
                 grid[i].append(Block(self.grid_size, self.grid[i][j].type))
 
-        with open("grid.pickle", "wb") as file:
+        with open("aux/grid.pickle", "wb") as file:
             pickle.dump(grid, file)
         print("Written grid to grid.pickle")
 
         # Prepare screen for dump
         self.fill(BLACK)
         self.draw()
-        with open("surfarray.pickle", "wb") as file:
+        with open("aux/surfarray.pickle", "wb") as file:
             pickle.dump(pg.surfarray.array3d(self.screen), file)
         print("Written surface array to surfarray.pickle")
 

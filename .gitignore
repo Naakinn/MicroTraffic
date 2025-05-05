@@ -1,5 +1,6 @@
 bak/
 venv/
 __pycache__/
+aux/
 *.pickle
 *.log
