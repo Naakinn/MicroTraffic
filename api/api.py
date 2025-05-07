@@ -14,9 +14,9 @@ def info():
     with open(filename, "r") as file:
         lines = file.readlines()
         for line in lines:
-            mode, module, idx, x, y = map(lambda s: s.strip(), line.split(":"))
-            data["vehicles"].append({ "mode": mode, "module":module, "idx": int(idx) + 1, "x": x, "y": y })
-    return render_template("index.html", data=data)
+            mode, module, idx, x, y, dir = map(lambda s: s.strip(), line.split(":"))
+            data["vehicles"].append({ "mode": mode, "module":module, "idx": idx, "x": x, "y": y, "dir": dir })
+    return render_template("traffic.html", data=data)
 
 if __name__ == "__main__":
     app.run(debug=True, port=8000)

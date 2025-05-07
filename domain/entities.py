@@ -6,11 +6,10 @@ import pygame as pg
 
 
 class DirectionType(Enum):
-    UP = auto()
-    DOWN = auto()
-    LEFT = auto()
-    RIGHT = auto()
-
+    UP = "UP"
+    DOWN = "DOWN"
+    LEFT = "LEFT"
+    RIGHT = "RIGHT"
 
 class CellType(Enum):
     R = auto()

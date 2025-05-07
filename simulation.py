@@ -84,7 +84,7 @@ class SimulationEngine:
     def log(self):
         open(self.logfile, "w").close()
         for idx, v in enumerate(self.vehicles):
-            self.logger.info(f"{idx}:{v.x}:{v.y}")
+            self.logger.info(f"{idx + 1}:{v.x}:{v.y}:{"NONE" if v.direction is None else v.direction.value}")
 
     def mainloop(self):
         pause = False

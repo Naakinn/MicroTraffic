@@ -12,6 +12,7 @@
                     <th scope="col">#</th>
                     <th scope="col">X coordinate</th>
                     <th scope="col">Y coordinate</th>
+                    <th scope="col">Direction</th>
                 </tr>
             </thead>
             <tbody>
@@ -20,12 +21,25 @@
                     <th scope="row">{{ v["idx"] }}</th>
                     <td class="text-center">{{ v["x"] }}</td>
                     <td class="text-center">{{ v["y"] }}</td>
+                    {% set dir = v["dir"] | lower %}
+                    {% if dir == "up" %}
+                    <td class="text-center">↑</td>
+                    {% elif dir == "down" %}
+                    <td class="text-center">↓</td>
+                    {% elif dir == "right" %}
+                    <td class="text-center">→</td>
+                    {% elif dir == "left" %}
+                    <td class="text-center">←</td>
+                    {% else %}
+                    <td class="text-center">∅</td>
+                    {% endif %}
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
         {% else %}
-        <p class="m-3 text-center" style="color: var(--bs-secondary-color);">No vehicles. Try adding new ones in simulation</p>
+        <p class="m-3 text-center" style="color: var(--bs-secondary-color);">No vehicles. Try adding new ones in
+            simulation</p>
         {% endif %}
     </div>
 </div>
