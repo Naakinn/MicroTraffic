@@ -1,3 +1,4 @@
+import logging
 import pickle
 from typing import Tuple
 
@@ -30,6 +31,10 @@ class MapBuilder:
         self.cursor_surfaces = []
         self.cursor_surf_types = []
 
+    def init_logging(self):
+        logging.basicConfig(level=logging.INFO)
+        self.logger = logging.getLogger(__name__)
+
     def load_cursor_surfaces(self):
         road = pg.Surface((self.grid_size, self.grid_size))
         road.fill(WHITE)
@@ -60,14 +65,14 @@ class MapBuilder:
 
         with open("aux/grid.pickle", "wb") as file:
             pickle.dump(grid, file)
-        print("Written grid to grid.pickle")
+        self.logger.info("Written grid to aux/grid.pickle")
 
         # Prepare screen for dump
         self.fill(BLACK)
         self.draw()
         with open("aux/surfarray.pickle", "wb") as file:
             pickle.dump(pg.surfarray.array3d(self.screen), file)
-        print("Written surface array to surfarray.pickle")
+        self.logger.info("Written surface to aux/surfarray.pickle")
 
     def fill(self, color: Tuple[int, int, int]):
         for i in range(self.gridnr):
@@ -111,14 +116,15 @@ class MapBuilder:
             pg.draw.line(self.screen, GRAY, (0, y), (WIDTH, y))
 
     def run(self):
+        self.init_logging()
         self.load_cursor_surfaces()
         mouse_x = 0
         mouse_y = 0
         running = True
         current_surf_idx = 0
-        print("Welcome to MapBuilder")
-        print("Press <X> to export current map")
-        print("Scroll mouse wheel to select blocks")
+        self.logger.info("Welcome to MapBuilder")
+        self.logger.info("Press <X> to export current map")
+        self.logger.info("Scroll mouse wheel to select blocks")
         while running:
             self.clock.tick(self.FPS)
 
@@ -129,7 +135,6 @@ class MapBuilder:
                         running = False
                     case pg.KEYDOWN:
                         if ev.key == pg.K_x:
-                            print("Exporting current map")
                             self.export()
                             running = False
                     case pg.MOUSEWHEEL:

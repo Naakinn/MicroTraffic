@@ -40,7 +40,7 @@ class Vehicle:
         self.set_direction(direction)
 
     def set_direction(self, direction: DirectionType):
-        if self.turns >= self.MAX_TURNS:
+        if self.turns > self.MAX_TURNS:
             return
         if self.direction != direction:
             self.turns += 1

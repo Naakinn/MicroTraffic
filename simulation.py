@@ -28,11 +28,11 @@ class SimulationEngine:
         self.cursor_surf_types: List[CellType] = []
         self.logfile = "simulation.log"
         self.init_logging()
-        
+
     def init_logging(self):
         logging.basicConfig(filename=self.logfile, level=logging.INFO)
         self.logger = logging.getLogger(__name__)
-        
+
     def usage(self):
         self.logger.debug("Welcome to MicroTraffic Simulation")
         self.logger.debug("Press <SPACE> to pause")
@@ -54,7 +54,9 @@ class SimulationEngine:
 
     def import_map(self):
         if not (os.path.exists(self.gridpath) and os.path.exists(self.surfpath)):
-            self.logger.error(f"'{self.gridpath}' and/or '{self.surfpath}' no such file(s)")
+            self.logger.error(
+                f"'{self.gridpath}' and/or '{self.surfpath}' no such file(s)"
+            )
             pg.quit()
             quit(1)
         with open(self.gridpath, "rb") as file:
@@ -78,12 +80,12 @@ class SimulationEngine:
             case _:
                 direction = DirectionType.LEFT
         self.vehicles.append(Vehicle(x, y, self.grid_size, self.grid, direction))
-        
+
     def log(self):
-        open(self.logfile, 'w').close()
+        open(self.logfile, "w").close()
         for idx, v in enumerate(self.vehicles):
             self.logger.info(f"{idx}:{v.x}:{v.y}")
-        
+
     def mainloop(self):
         pause = False
         max_delay = 30
@@ -134,7 +136,8 @@ class SimulationEngine:
                 delay = max_delay
 
             # Update state
-            if delay > 0: delay -= 1
+            if delay > 0:
+                delay -= 1
             if not pause:
                 for vehicle in self.vehicles:
                     vehicle.move()
