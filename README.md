@@ -25,6 +25,12 @@ python simulation.py
 ```
 in the same directory to use saved map in your simulation. 
 
+### Check out simulation's state at web page
+Run
+```
+python api/api.py
+```
+and check out localhost:8000/api/traffic/info
 ## Docs
 ### MapBuilder
 Scroll your mouse wheel to select different blocks:

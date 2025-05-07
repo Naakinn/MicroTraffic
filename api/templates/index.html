@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Logging system{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-center">
+    <div class="d-inline-flex flex-column m-3">
+        {% if data["vehicles"] | length != 0 %}
+        <table class="table">
+            <caption class="caption-top text-center">State</caption>
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">X coordinate</th>
+                    <th scope="col">Y coordinate</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for v in data["vehicles"] %}
+                <tr>
+                    <th scope="row">{{ v["idx"] }}</th>
+                    <td class="text-center">{{ v["x"] }}</td>
+                    <td class="text-center">{{ v["y"] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="m-3 text-center" style="color: var(--bs-secondary-color);">No vehicles. Try adding new ones in simulation</p>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

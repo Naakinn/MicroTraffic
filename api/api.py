@@ -1,4 +1,4 @@
-from flask import Flask, Response, jsonify
+from flask import Flask, Response, render_template
 
 app = Flask(__name__)
 filename = "simulation.log"
@@ -15,8 +15,8 @@ def info():
         lines = file.readlines()
         for line in lines:
             mode, module, idx, x, y = map(lambda s: s.strip(), line.split(":"))
-            data["vehicles"].append({ "mode": mode, "module":module, "idx": idx, "x": x, "y": y })
-    return jsonify(data)
+            data["vehicles"].append({ "mode": mode, "module":module, "idx": int(idx) + 1, "x": x, "y": y })
+    return render_template("index.html", data=data)
 
 if __name__ == "__main__":
     app.run(debug=True, port=8000)
