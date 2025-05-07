@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import List
 
 import pygame as pg
 
@@ -10,6 +9,7 @@ class DirectionType(Enum):
     DOWN = "DOWN"
     LEFT = "LEFT"
     RIGHT = "RIGHT"
+
 
 class CellType(Enum):
     R = auto()
@@ -22,11 +22,7 @@ class CellType(Enum):
     UR = auto()
     DR = auto()
     DL = auto()
-
-
-@dataclass
-class Intersection:
-    directions: List[DirectionType]
+    LIGHT = auto
 
 
 class Cell(pg.surface.Surface):
@@ -36,6 +32,7 @@ class Cell(pg.surface.Surface):
 
     def set_type(self, type: CellType):
         self.type = type
+
 
 @dataclass
 class Block:

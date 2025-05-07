@@ -11,7 +11,7 @@ from domain.image_loader import image_load
 BLACK = (60, 60, 60)
 WHITE = (220, 220, 220)
 GRAY = (180, 180, 180)
-
+GREEN = (85, 243, 36)
 
 class MapBuilder:
     FPS = 60
@@ -45,6 +45,10 @@ class MapBuilder:
                     image_load("res/" + name + ".png"), (self.grid_size, self.grid_size)
                 )
             )
+        light = pg.Surface((self.grid_size, self.grid_size))
+        light.fill(GREEN)
+        self.cursor_surfaces.append(light)
+        
         self.cursor_surf_types = [
             CellType.R,
             CellType.UI,
@@ -55,6 +59,7 @@ class MapBuilder:
             CellType.UR,
             CellType.DR,
             CellType.DL,
+            CellType.LIGHT
         ]
 
     def export(self):
@@ -104,6 +109,8 @@ class MapBuilder:
                         self.grid[i][j].blit(self.cursor_surfaces[7], (0, 0))
                     case CellType.DL:
                         self.grid[i][j].blit(self.cursor_surfaces[8], (0, 0))
+                    case CellType.LIGHT:
+                        self.grid[i][j].blit(self.cursor_surfaces[9], (0, 0))
                 # Draw cell
                 self.screen.blit(self.grid[i][j], (sx, sy))
                 sx += self.grid_size

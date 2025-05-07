@@ -1,8 +1,6 @@
 import random
 from typing import Tuple, List
 
-from numpy import e
-
 from .entities import DirectionType, CellType, Block
 
 
@@ -101,7 +99,7 @@ class Vehicle:
                     random.choice((DirectionType.DOWN, DirectionType.RIGHT))
                 )
 
-    def update_direction(self):
+    def update_direction(self, light_state: bool):
         if self.current_block is None:
             self.stop()
             return
@@ -110,6 +108,11 @@ class Vehicle:
                 self.turns = 0
             case CellType.W:
                 self.stop()
+            case CellType.LIGHT:
+                if not light_state:
+                     self.vx = self.vy = 0
+                else:
+                    self.set_direction(self.direction) # type: ignore
             case _:
                 center_x = (
                     self.x // self.block_size
@@ -124,8 +127,8 @@ class Vehicle:
                 ):
                     self.match_direction(self.current_block.type)  # type: ignore
 
-    def move(self):
+    def move(self, light_state: bool):
         self.x += self.vx
         self.y += self.vy
         self.update_current_block()
-        self.update_direction()
+        self.update_direction(light_state)

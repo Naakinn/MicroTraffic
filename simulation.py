@@ -9,6 +9,10 @@ from domain.entities import Block, CellType, DirectionType
 from domain.vehicle import Vehicle
 from domain.image_loader import image_load
 
+# Colors (RGB)
+GREEN = (85, 243, 36)
+RED = (240, 20, 20)
+
 
 class SimulationEngine:
     FPS = 60
@@ -22,6 +26,7 @@ class SimulationEngine:
         self.surfpath = surfpath
         self.screen = pg.display.set_mode(size)
         self.clock = pg.time.Clock()
+        self.lights: List[Tuple[Block, int, int]] = []
         self.vehicles: List[Vehicle] = []
         self.current_surf_idx: int = 0
         self.cursor_surfaces: List[pg.Surface] = []
@@ -59,6 +64,7 @@ class SimulationEngine:
             )
             pg.quit()
             quit(1)
+
         with open(self.gridpath, "rb") as file:
             self.grid = pickle.load(file)
             self.grid_size = self.grid[0][0].size
@@ -66,6 +72,16 @@ class SimulationEngine:
         with open(self.surfpath, "rb") as file:
             self.map = pg.surfarray.make_surface(pickle.load(file))
         self.logger.info(f"'{self.surfpath}' imported")
+
+        # Load traffic lights
+        x = y = 0
+        for row in self.grid:
+            x = 0
+            for block in row:
+                if block.type == CellType.LIGHT:
+                    self.lights.append((block, x, y))
+                x += self.grid_size
+            y += self.grid_size
 
     def add_vehicle(self, mouse_x: int, mouse_y: int):
         x = (mouse_x // self.grid_size) * self.grid_size + self.grid_size // 2
@@ -84,12 +100,17 @@ class SimulationEngine:
     def log(self):
         open(self.logfile, "w").close()
         for idx, v in enumerate(self.vehicles):
-            self.logger.info(f"{idx + 1}:{v.x}:{v.y}:{"NONE" if v.direction is None else v.direction.value}")
+            self.logger.info(
+                f"{idx + 1}:{v.x}:{v.y}:{'NONE' if v.direction is None else v.direction.value}"
+            )
 
     def mainloop(self):
         pause = False
-        max_delay = 30
-        delay = 0
+        max_cursor_delay_tick = 30
+        cursor_delay_tick = 0
+        max_light_period_tick = 120
+        light_period_tick = 0
+        light_state = False  # false - stop, true - go
         while True:
             # Tick FPS
             self.clock.tick(self.FPS)
@@ -131,18 +152,38 @@ class SimulationEngine:
                     (mouse_y // self.grid_size) * self.grid_size,
                 ),
             )
-            if delay == 0 and mouse_clicked[0]:  # right click
+            if cursor_delay_tick == 0 and mouse_clicked[0]:  # right click
                 self.add_vehicle(mouse_x, mouse_y)
-                delay = max_delay
+                cursor_delay_tick = max_cursor_delay_tick
+            if light_period_tick == 0:
+                light_state = not light_state
+                light_period_tick = max_light_period_tick
 
             # Update state
-            if delay > 0:
-                delay -= 1
+            if cursor_delay_tick > 0:
+                cursor_delay_tick -= 1
+
             if not pause:
                 for vehicle in self.vehicles:
-                    vehicle.move()
+                    vehicle.move(light_state)
+                if light_period_tick > 0:
+                    light_period_tick -= 1
 
-            # Draw vehicles& Update
+            # Draw vehicles & Update
+            for _, x, y in self.lights:
+                if light_state:
+                    pg.draw.rect(
+                        self.screen,
+                        GREEN,
+                        pg.Rect(x, y, self.grid_size, self.grid_size),
+                    )
+                else:
+                    pg.draw.rect(
+                        self.screen,
+                        RED,
+                        pg.Rect(x, y, self.grid_size, self.grid_size),
+                    )
+
             for vehicle in self.vehicles:
                 pg.draw.circle(
                     self.screen,
