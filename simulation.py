@@ -167,6 +167,9 @@ class SimulationEngine:
             if not pause:
                 for vehicle in self.vehicles:
                     vehicle.move(light_state)
+                    vehicle.collide(self.vehicles)
+                    if vehicle.direction is None:
+                        self.vehicles.remove(vehicle)
                 if light_period_tick > 0:
                     light_period_tick -= 1
 

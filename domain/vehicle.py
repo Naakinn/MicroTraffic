@@ -1,12 +1,13 @@
 import random
-from typing import Tuple, List
+from math import sqrt
+from typing import List, Tuple
 
-from .entities import DirectionType, CellType, Block
+from .entities import Block, CellType, DirectionType
 
 
 class Vehicle:
-    RADIUS = 10
-    DETECTION_DISTANCE = 3
+    RADIUS = 12
+    DETECTION_DISTANCE = 1
     MAX_TURNS = 2
 
     def __init__(
@@ -110,9 +111,9 @@ class Vehicle:
                 self.stop()
             case CellType.LIGHT:
                 if not light_state:
-                     self.vx = self.vy = 0
+                    self.vx = self.vy = 0
                 else:
-                    self.set_direction(self.direction) # type: ignore
+                    self.set_direction(self.direction)  # type: ignore
             case _:
                 center_x = (
                     self.x // self.block_size
@@ -132,3 +133,12 @@ class Vehicle:
         self.y += self.vy
         self.update_current_block()
         self.update_direction(light_state)
+
+    def collide(self, vehicles: List["Vehicle"]):
+        for vehicle in vehicles:
+            if vehicle != self:
+                d = round(sqrt((vehicle.x - self.x) ** 2 + (vehicle.y - self.y) ** 2))
+                d -= self.RADIUS * 2
+                if (d < 0):
+                    self.x -= self.vx
+                    self.y -= self.vy
