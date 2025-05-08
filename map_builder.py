@@ -68,16 +68,16 @@ class MapBuilder:
             for j in range(self.gridnr):
                 grid[i].append(Block(self.grid_size, self.grid[i][j].type))
 
-        with open("aux/grid.pickle", "wb") as file:
+        with open("grid.pickle", "wb") as file:
             pickle.dump(grid, file)
-        self.logger.info("Written grid to aux/grid.pickle")
+        self.logger.info("Written grid to grid.pickle")
 
         # Prepare screen for dump
         self.fill(BLACK)
         self.draw()
-        with open("aux/surfarray.pickle", "wb") as file:
+        with open("surfarray.pickle", "wb") as file:
             pickle.dump(pg.surfarray.array3d(self.screen), file)
-        self.logger.info("Written surface to aux/surfarray.pickle")
+        self.logger.info("Written surface to surfarray.pickle")
 
     def fill(self, color: Tuple[int, int, int]):
         for i in range(self.gridnr):

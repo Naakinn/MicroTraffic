@@ -207,5 +207,5 @@ class SimulationEngine:
 
 
 if __name__ == "__main__":
-    sim = SimulationEngine("aux/grid.pickle", "aux/surfarray.pickle", (600, 600))
+    sim = SimulationEngine("grid.pickle", "surfarray.pickle", (600, 600))
     sim.run()
