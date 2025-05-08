@@ -6,7 +6,7 @@
     <div class="d-inline-flex flex-column m-3">
         {% if data["vehicles"] | length != 0 %}
         <table class="table">
-            <caption class="caption-top text-center">State</caption>
+            <caption class="caption-top text-center">Vehicles: </caption>
             <thead>
                 <tr>
                     <th scope="col">#</th>
@@ -41,6 +41,7 @@
         <p class="m-3 text-center" style="color: var(--bs-secondary-color);">No vehicles. Try adding new ones in
             simulation</p>
         {% endif %}
+        <p class="m-3 text-center" style="color: var(--bs-secondary-color);">Traffic light state: {{ data["traffic_light"] }}</p>
     </div>
 </div>
 

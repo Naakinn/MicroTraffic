@@ -97,12 +97,13 @@ class SimulationEngine:
                 direction = DirectionType.LEFT
         self.vehicles.append(Vehicle(x, y, self.grid_size, self.grid, direction))
 
-    def log(self):
+    def log(self, light_state: bool):
         open(self.logfile, "w").close()
         for idx, v in enumerate(self.vehicles):
             self.logger.info(
-                f"{idx + 1}:{v.x}:{v.y}:{'NONE' if v.direction is None else v.direction.value}"
+                f"v:{idx + 1}:{v.x}:{v.y}:{'NONE' if v.direction is None else v.direction.value}"
             )
+        self.logger.info(f"l:{"GREEN" if light_state else "RED"}")
 
     def mainloop(self):
         pause = False
@@ -139,7 +140,7 @@ class SimulationEngine:
                             self.current_surf_idx = len(self.cursor_surfaces) - 1
 
             # Log
-            self.log()
+            self.log(light_state)
             # Draw map
             self.screen.blit(self.map, (0, 0))
 
