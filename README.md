@@ -36,9 +36,12 @@ and check out localhost:8000/api/traffic/info
 Scroll your mouse wheel to select different blocks:
 - white block - road
 - arrows - intersections(arrow specify where a vehicle have to turn)
+- green block - traffic light
 
 Left click - place selected block
 Right click - remove block 
 ### Simulation
 Scroll your mouse wheel to spawn vehicles with different directions
 
+### Web API
+Check out `localhost:8000/api/traffic/info` to see what happens inside a simulation.
